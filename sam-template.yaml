@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Generates a thumbnail for videos uploaded to a S3 bucket.'
+Resources:
+  InputBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+  ThumbnailBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+  Topic:
+    Type: 'AWS::SNS::Topic'
+    Properties: {}
+  FfmpegLambdaLayer:
+    Type: 'AWS::Serverless::Application'
+    Properties:
+      Location:
+        ApplicationId: >-
+          arn:aws:serverlessrepo:us-east-1:145266761615:applications/ffmpeg-lambda-layer
+        SemanticVersion: 1.0.0
+  ThumbnailFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: generateThumbnail.handler
+      Runtime: nodejs12.x
+      CodeUri: src
+      MemorySize: 512
+      Timeout: 60
+      Policies:
+        - AWSLambdaExecute
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt Topic.TopicName
+      Environment:
+        Variables:
+          THUMBNAIL_BUCKET: !Ref ThumbnailBucket
+          SNS_TOPIC: !Ref Topic
+          DEBUG: !Ref DebugLevel
+          MARKS: !Ref Marks
+      Layers:
+        - !GetAtt FfmpegLambdaLayer.Outputs.LayerVersion
+      Events:
+        S3:
+          Type: S3
+          Properties:
+            Bucket: !Ref InputBucket
+            Events: 's3:ObjectCreated:*'
+Parameters:
+  DebugLevel:
+    Type: String
+    Default: ""
+    Description: "The DEBUG environment variable for the Lambda. Set to 'cloudformation-video-thumbnail' to enable debug."
+  Marks:
+    Type: String
+    Default: '0.01,0.25,0.5,0.75,0.99'
+    Description: "A comma-separated list of the points at which to take thumbnail screenshots."
+Outputs:
+  InputBucket:
+    Description: S3 Input Bucket
+    Value: !Ref InputBucket
+  InputBucketArn:
+    Description: S3 Input Bucket ARN
+    Value: !GetAtt InputBucket.Arn
+  ThumbnailBucket:
+    Description: Thumbnail Bucket
+    Value: !Ref ThumbnailBucket
+  ThumbnailBucketArn:
+    Description: Thumbnail Bucket ARN
+    Value: !GetAtt ThumbnailBucket.Arn
+  Topic:
+    Description: SNS Notification Topic
+    Value: !Ref Topic
