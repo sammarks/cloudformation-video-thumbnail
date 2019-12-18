@@ -1,6 +1,6 @@
 {
   "name": "cloudformation-video-thumbnail",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Generates a thumbnail for videos uploaded to a S3 bucket.",
   "main": "index.js",
   "repository": "https://github.com/sammarks/cloudformation-video-thumbnail",
