@@ -7,7 +7,7 @@
   "author": "Sam Marks <sam@sammarks.me>",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint src/*.js test/*.js",
+    "lint": "eslint src/*.js",
     "test": "jest --coverage",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "release": "standard-version",
