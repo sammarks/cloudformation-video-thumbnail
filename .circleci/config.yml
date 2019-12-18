@@ -30,9 +30,9 @@ jobs:
       #       JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
       # - store_test_results:
       #     path: reports
-      - run:
-          name: Report Coverage
-          command: yarn report-coverage
+      # - run:
+      #     name: Report Coverage
+      #     command: yarn report-coverage
       - persist_to_workspace:
           root: ~/repo
           paths: .
