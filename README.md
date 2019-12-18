@@ -64,6 +64,22 @@ resources:
     otherResource: # ... all of your original resources
 ```
 
+### Regions
+
+**A quick note on regions:** If you are deploying this stack in a region other than `us-east-1`,
+you need to reference the proper region S3 bucket as we're deploying Lambda functions. Just
+add the region suffix to the template URL, so this:
+
+```
+https://sammarks-cf-templates.s3.amazonaws.com/video-thumbnail/VERSION/template.yaml
+```
+
+becomes this:
+
+```
+https://sammarks-cf-templates-us-east-2.s3.amazonaws.com/video-thumbnail/VERSION/template.yaml
+```
+
 ### What's deployed?
 
 - Two S3 buckets: one for video input, one for video output.
