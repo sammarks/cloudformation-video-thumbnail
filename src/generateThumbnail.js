@@ -94,12 +94,15 @@ const processImage = async (key, target, seek, resultName) => {
 }
 
 module.exports.handler = async (event) => {
-  const srcKey = decodeURIComponent(event.Records[0].s3.object.key).replace(/\+/g, ' ')
-  const bucket = event.Records[0].s3.bucket.name
+  debug('incoming S3 message', event.Records[0].Sns.Message)
+  const message = JSON.parse(event.Records[0].Sns.Message)
+  debug('decoded message', message)
+  const srcKey = decodeURIComponent(message.Records[0].s3.object.key).replace(/\+/g, ' ')
+  const bucket = message.Records[0].s3.bucket.name
 
   await reportStatusUpdate(bucket, srcKey, STATUSES.PROCESSING)
 
-  const target = s3.getSignedUrl('getObject', { Bucket: bucket, Key: srcKey, Expires: 1000 })
+  const target = s3.getSignedUrl('getObject', { Bucket: bucket, Key: srcKey, Expires: 60000 })
   let fileType = srcKey.match(/\.\w+$/)
 
   if (!fileType) {

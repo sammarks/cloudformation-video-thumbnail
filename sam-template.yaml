@@ -4,13 +4,38 @@ Description: 'Generates a thumbnail for videos uploaded to a S3 bucket.'
 Resources:
   InputBucket:
     Type: 'AWS::S3::Bucket'
-    Properties: {}
+    Properties:
+      BucketName: !Ref InputBucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Topic: !Ref BucketCreatedTopic
+    DependsOn: ['BucketCreatedTopicPolicy']
   ThumbnailBucket:
     Type: 'AWS::S3::Bucket'
     Properties: {}
   Topic:
     Type: 'AWS::SNS::Topic'
     Properties: {}
+  BucketCreatedTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties: {}
+  BucketCreatedTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref BucketCreatedTopic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: ['SNS:Publish']
+            Resource: '*'
+            Condition:
+              ArnLike:
+                'aws:SourceArn': !Join ['', ['arn:aws:s3:::', !Ref InputBucketName]]
   FfmpegLambdaLayer:
     Type: 'AWS::Serverless::Application'
     Properties:
@@ -39,11 +64,10 @@ Resources:
       Layers:
         - !GetAtt FfmpegLambdaLayer.Outputs.LayerVersion
       Events:
-        S3:
-          Type: S3
+        SNS:
+          Type: SNS
           Properties:
-            Bucket: !Ref InputBucket
-            Events: 's3:ObjectCreated:*'
+            Topic: !Ref BucketCreatedTopic
 Parameters:
   DebugLevel:
     Type: String
@@ -53,6 +77,9 @@ Parameters:
     Type: String
     Default: '0.01,0.25,0.5,0.75,0.99'
     Description: "A comma-separated list of the points at which to take thumbnail screenshots."
+  InputBucketName:
+    Type: String
+    Description: "The name of the video input bucket."
 Outputs:
   InputBucket:
     Description: S3 Input Bucket
@@ -69,3 +96,6 @@ Outputs:
   Topic:
     Description: SNS Notification Topic
     Value: !Ref Topic
+  S3Topic:
+    Description: S3 Object Created SNS Topic
+    Value: !Ref BucketCreatedTopic
