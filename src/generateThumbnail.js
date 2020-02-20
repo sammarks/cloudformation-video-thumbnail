@@ -17,6 +17,7 @@ const snsTopic = process.env.SNS_TOPIC
 
 const STATUSES = {
   PROCESSING: 'PROCESSING',
+  DURATION: 'DURATION',
   ERROR: 'ERROR',
   COMPLETE: 'COMPLETE'
 }
@@ -131,6 +132,7 @@ module.exports.handler = async (event) => {
     ])
     debug('ffprobe result %O', ffprobe)
     const duration = Math.ceil(ffprobe.stdout.toString())
+    await reportStatusUpdate(bucket, srcKey, STATUSES.DURATION, duration)
 
     const results = []
     for (const mark of MARKS) {

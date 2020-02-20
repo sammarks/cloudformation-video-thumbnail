@@ -124,6 +124,7 @@ https://sammarks-cf-templates.s3.amazonaws.com/video-thumbnail/VERSION/template.
 ## Features
 
 - Automatically generate thumbnails at predefined offsets for any video files uploaded to a S3 bucket.
+- Reports the duration of videos to SNS as well whenever it is found.
 - Send notifications about updates and error messages to a SNS topic.
 - Deploy with other CloudFormation-compatible frameworks (like the Serverless framework).
 - All functionality is self-contained within one CloudFormation template. Delete the template, and all of our created resources are removed.
